@@ -18,10 +18,10 @@
   "productName": "Aeroium",
   "description": "A lightweight, privacy-minded desktop browser built on Electron.",
   "license": "MIT",
-  "author": "Your Name <you@example.com>",
+  "author": "Eren Y. <info@erendev.xyz>",
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/YOUR_USER/aeroium.git"
+    "type": "url",
+    "url": "https://github.com/erendevtr/"
   },
   "keywords": [
     "browser",
