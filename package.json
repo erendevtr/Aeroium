@@ -1,0 +1,18 @@
+{
+  "name": "aeroium",
+  "version": "0.2.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "dependencies": {
+    "@ghostery/adblocker-electron": "^2.0.0",
+    "cheerio": "^1.0.0",
+    "cross-fetch": "^4.0.0",
+    "electron-chrome-extensions": "^4.10.0",
+    "electron-chrome-web-store": "^0.13.0"
+  }
+}

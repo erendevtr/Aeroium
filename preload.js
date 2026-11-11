@@ -1,0 +1,32 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('aeroium', {
+  newTab: (u) => ipcRenderer.invoke('nt', u),
+  close: (id) => ipcRenderer.send('ct', id),
+  activate: (id) => ipcRenderer.send('at', id),
+  nav: (text) => ipcRenderer.send('nv', text),
+  back: () => ipcRenderer.send('bk'),
+  fwd: () => ipcRenderer.send('fw'),
+  reload: () => ipcRenderer.send('rl'),
+  onTabs: (f) => ipcRenderer.on('tabs', (_e, t) => f(t)),
+  onUrl: (f) => ipcRenderer.on('url', (_e, u) => f(u)),
+  onIsLocalPage: (f) => ipcRenderer.on('is-local-page', (_e, isLocal) => f(isLocal)),
+  onNotification: (f) => ipcRenderer.on('show-notification', (_e, msg) => f(msg)),
+  onThemeChanged: (f) => ipcRenderer.on('theme-changed', (_e, theme) => f(theme)),
+  onOpenCmd: (f) => ipcRenderer.on('open-cmd', () => f()),
+  speedUp: () => ipcRenderer.send('speedup'),
+  darkMode: () => ipcRenderer.send('darkmode'),
+  readerMode: () => ipcRenderer.send('readermode'),
+  getNote: () => ipcRenderer.invoke('get-note'),
+  saveNote: (text) => ipcRenderer.send('save-note', text),
+  applyTheme: (theme) => ipcRenderer.send('apply-theme', theme),
+  setModalOpen: (open) => ipcRenderer.send('modal-state', !!open),
+  getI18n: () => ipcRenderer.invoke('get-i18n'),
+  getExtensions: () => ipcRenderer.invoke('get-extensions'),
+  openExtension: (id) => ipcRenderer.send('open-extension', id),
+  removeExtension: (id) => ipcRenderer.invoke('remove-extension', id),
+  openWebStore: () => ipcRenderer.invoke('open-webstore'),
+  min: () => ipcRenderer.send('min'),
+  max: () => ipcRenderer.send('max'),
+  closeWin: () => ipcRenderer.send('close-win')
+});

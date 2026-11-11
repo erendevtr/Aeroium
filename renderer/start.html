@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aeroium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root { 
+      --bg: #121216; --text: #ffffff; --text-muted: #8a8a9e;
+      --box: #1e1e24; --box-hover: #2b2b36; --input-bg: #1a1a20; 
+      --accent: #6b9fff; --border: rgba(255,255,255,0.08);
+    }
+    [data-theme="light"] { 
+      --bg: #f0f2f5; --text: #1a1a20; --text-muted: #5f6368;
+      --box: #ffffff; --box-hover: #f1f3f4; --input-bg: #ffffff; 
+      --accent: #1a73e8; --border: rgba(0,0,0,0.1);
+    }
+    [data-theme="nord"] { 
+      --bg: #242933; --text: #eceff4; --text-muted: #8fbcbb;
+      --box: #2e3440; --box-hover: #3b4252; --input-bg: #2e3440; 
+      --accent: #88c0d0; --border: rgba(255,255,255,0.1);
+    }
+    [data-theme="rose"] { 
+      --bg: #191724; --text: #e0def4; --text-muted: #908caa;
+      --box: #1f1d2e; --box-hover: #26233a; --input-bg: #1f1d2e; 
+      --accent: #ebbcba; --border: rgba(255,255,255,0.1);
+    }
+    
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; padding: 0; height: 100vh; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; 
+      background: var(--bg); color: var(--text); 
+      font-family: 'Inter', -apple-system, sans-serif; 
+      transition: background 0.4s, color 0.4s; 
+      position: relative;
+    }
+
+    .glow-orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1;
+      opacity: 0.4; animation: float 10s infinite ease-in-out alternate;
+    }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; left: -100px; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent); bottom: -50px; right: -50px; animation-delay: -5s; }
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 50px) scale(1.1); }
+    }
+
+    #splash { 
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+      background: var(--bg); z-index: 9999; 
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s;
+    }
+    #splash.hide { opacity: 0; visibility: hidden; }
+    
+    .logo-container { position: relative; display: flex; justify-content: center; align-items: center; width: 150px; height: 150px; }
+    
+    .ring {
+      position: absolute; border-radius: 50%; border: 2px solid transparent;
+      border-top-color: var(--accent); border-right-color: var(--accent);
+      animation: spin 1.5s linear infinite;
+    }
+    .ring:nth-child(1) { width: 140px; height: 140px; animation-duration: 1s; filter: drop-shadow(0 0 10px var(--accent)); }
+    .ring:nth-child(2) { width: 100px; height: 100px; animation-direction: reverse; animation-duration: 1.5s; opacity: 0.7; }
+    .ring:nth-child(3) { width: 60px; height: 60px; animation-duration: 2s; opacity: 0.4; }
+
+    .splash-text {
+      font-size: 36px; font-weight: 800; letter-spacing: 4px; margin-top: 30px;
+      background: linear-gradient(90deg, var(--accent), var(--text), var(--accent));
+      background-size: 200% auto; color: transparent; -webkit-background-clip: text;
+      animation: shine 2s linear infinite;
+    }
+    
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes shine { to { background-position: 200% center; } }
+
+    .main-content { 
+      opacity: 0; transform: translateY(30px) scale(0.98); 
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; flex-direction: column; align-items: center; width: 100%; z-index: 1;
+    }
+    .main-content.show { opacity: 1; transform: translateY(0) scale(1); }
+
+    .top-right { position: fixed; top: 20px; right: 20px; z-index: 10; }
+    
+    .theme-custom { position: relative; }
+    .theme-btn { 
+      background: var(--box); border: 1px solid var(--border); color: var(--text); 
+      padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; 
+      font-family: 'Inter', sans-serif; font-weight: 600; transition: 0.2s; outline: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .theme-btn:hover { background: var(--box-hover); border-color: var(--accent); }
+    
+    .theme-dropdown {
+      position: absolute; top: 110%; right: 0; width: 160px;
+      background: var(--box); border: 1px solid var(--border); border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden;
+      display: none; flex-direction: column; padding: 6px;
+    }
+    .theme-dropdown.show { display: flex; }
+    .theme-option {
+      padding: 10px 12px; font-size: 13px; color: var(--text); cursor: pointer;
+      border-radius: 6px; transition: 0.2s; font-weight: 500;
+    }
+    .theme-option:hover { background: var(--box-hover); }
+    .theme-option.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+    .logo { 
+      font-size: 64px; font-weight: 800; margin-bottom: 10px; letter-spacing: -2px; 
+      background: linear-gradient(to right, var(--text), var(--text-muted));
+      -webkit-background-clip: text; color: transparent;
+    }
+    .subtitle { color: var(--text-muted); margin-bottom: 40px; font-size: 16px; font-weight: 400; }
+
+    .search-wrapper {
+      position: relative; width: 100%; max-width: 650px; margin-bottom: 50px;
+      border-radius: 30px; padding: 2px; 
+      background: var(--border); overflow: hidden; transition: box-shadow 0.3s;
+    }
+    
+    .search-wrapper::before {
+      content: ""; position: absolute; top: 50%; left: 50%; 
+      width: 150%; height: 150%; 
+      background: conic-gradient(from 0deg, transparent 0%, transparent 70%, var(--accent) 85%, transparent 100%);
+      transform: translate(-50%, -50%) rotate(0deg);
+      animation: rotate-border 4s linear infinite;
+      opacity: 0; transition: opacity 0.3s; z-index: 0;
+    }
+
+    .search-wrapper:hover::before, .search-wrapper:focus-within::before { opacity: 1; }
+    .search-wrapper:focus-within { box-shadow: 0 0 20px rgba(107, 159, 255, 0.2); }
+
+    @keyframes rotate-border {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .search-box input { 
+      width: 100%; height: 60px; border-radius: 28px; border: none; 
+      background: var(--input-bg); color: var(--text); padding: 0 28px; font-size: 17px; 
+      outline: none; font-family: 'Inter', sans-serif; position: relative; z-index: 1;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .shortcuts { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 800px; }
+    .shortcut { 
+      width: 110px; height: 110px; background: var(--box); 
+      border: 1px solid var(--border); border-radius: 20px; 
+      display: flex; flex-direction: column; justify-content: center; align-items: center; 
+      cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; color: var(--text); 
+      position: relative; backdrop-filter: blur(10px);
+    }
+    .shortcut:hover { 
+      background: var(--box-hover); transform: translateY(-5px); 
+      border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.15); 
+    }
+    
+    .shortcut-icon { 
+      width: 40px; height: 40px; border-radius: 12px; margin-bottom: 12px;
+      display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; 
+      transition: transform 0.3s;
+    }
+    .shortcut:hover .shortcut-icon { transform: scale(1.1) rotate(5deg); }
+    .shortcut-text { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-align: center; line-height: 1.2;}
+    
+    .sc-oauth { background: linear-gradient(135deg, #4285F4, #34a853); color: white; box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3); }
+    .sc-captcha { background: linear-gradient(135deg, #F4B400, #db4437); color: white; box-shadow: 0 4px 15px rgba(244, 180, 0, 0.3); }
+    
+    .sc-add { background: transparent; border: 2px dashed var(--border); color: var(--text-muted); backdrop-filter: none; }
+    .sc-add:hover { border-color: var(--accent); color: var(--accent); background: rgba(107, 159, 255, 0.05); }
+    
+    .delete-btn {
+      position: absolute; top: -8px; right: -8px; width: 26px; height: 26px;
+      background: #e81123; color: white; border: none; border-radius: 50%;
+      display: none; justify-content: center; align-items: center; cursor: pointer;
+      font-size: 12px; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2;
+    }
+    .shortcut:hover .delete-btn { display: flex; }
+
+    .modal-overlay { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; 
+      z-index: 100; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.3s;
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal { 
+      background: var(--box); padding: 35px; border-radius: 20px; width: 380px; 
+      border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-overlay.active .modal { transform: scale(1); }
+    .modal h2 { margin-top: 0; margin-bottom: 25px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .modal input { 
+      width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; 
+      border: 1px solid var(--border); background: var(--input-bg); color: var(--text); 
+      outline: none; font-family: inherit; font-size: 14px;
+    }
+    .modal input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(107, 159, 255, 0.2); }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+    .modal-btn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: 0.2s; }
+    .btn-cancel { background: var(--box-hover); color: var(--text); }
+    .btn-cancel:hover { opacity: 0.8; }
+    .btn-save { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(107, 159, 255, 0.4); }
+    .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div id="splash">
+    <div class="logo-container">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+    </div>
+    <div class="splash-text">Aeroium</div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="top-right">
+      <div class="theme-custom">
+        <button id="themeBtn" class="theme-btn">
+          <span id="currentThemeText">Aeroium Dark</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="themeDropdown" class="theme-dropdown">
+          <div class="theme-option" data-theme="dark" data-i18n="start.theme.dark">Aeroium Dark</div>
+          <div class="theme-option" data-theme="light" data-i18n="start.theme.light">Aeroium Light</div>
+          <div class="theme-option" data-theme="nord" data-i18n="start.theme.nord">Nord</div>
+          <div class="theme-option" data-theme="rose" data-i18n="start.theme.rose">Rosé</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="logo">Aeroium</div>
+    <div class="subtitle" data-i18n="start.subtitle">Think, search, discover.</div>
+
+    <div class="search-wrapper">
+      <div class="search-box">
+        <input type="text" id="searchInput" data-i18n-placeholder="start.searchPlaceholder" placeholder="Search Aeroium or type a URL..." autofocus>
+      </div>
+    </div>
+
+    <div class="shortcuts" id="shortcuts-container">
+      <a href="https://oauth2.erendev.xyz" class="shortcut">
+        <div class="shortcut-icon sc-oauth">O</div>
+        <span class="shortcut-text">ErenDev<br>oAuth2</span>
+      </a>
+      <a href="https://captcha.erendev.xyz" class="shortcut">
+        <div class="shortcut-icon sc-captcha">C</div>
+        <span class="shortcut-text">eCaptcha</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <h2 data-i18n="start.addTitle">Add New Shortcut</h2>
+      <input type="text" id="newName" data-i18n-placeholder="start.namePlaceholder" placeholder="Shortcut name (e.g. GitHub)">
+      <input type="text" id="newUrl" data-i18n-placeholder="start.urlPlaceholder" placeholder="URL (e.g. github.com)">
+      <div class="modal-actions">
+        <button class="modal-btn btn-cancel" data-i18n="start.cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn btn-save" data-i18n="start.add" onclick="saveShortcut()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const themeBtn = document.getElementById('themeBtn');
+    const themeDropdown = document.getElementById('themeDropdown');
+    const currentThemeText = document.getElementById('currentThemeText');
+    const savedTheme = localStorage.getItem('aeroium-theme') || 'dark';
+    
+    let S = {};
+    const t = (key) => S[key] || key;
+    const themeNames = () => ({ dark: t('start.theme.dark'), light: t('start.theme.light'), nord: t('start.theme.nord'), rose: t('start.theme.rose') });
+
+    function applyI18n() {
+      document.querySelectorAll('[data-i18n]').forEach((n) => { n.textContent = t(n.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((n) => { n.placeholder = t(n.dataset.i18nPlaceholder); });
+    }
+
+    if (window.aeroium && window.aeroium.getI18n) {
+      window.aeroium.getI18n().then(({ lang, dir, strings }) => {
+        S = strings;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = dir;
+        applyI18n();
+        currentThemeText.textContent = themeNames()[localStorage.getItem('aeroium-theme') || 'dark'];
+      }).catch((err) => console.error('Dil yüklenemedi:', err));
+    }
+    
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    currentThemeText.textContent = themeNames()[savedTheme];
+
+    themeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      themeDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+      themeDropdown.classList.remove('show');
+    });
+
+    document.querySelectorAll('.theme-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const newTheme = opt.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('aeroium-theme', newTheme);
+        currentThemeText.textContent = themeNames()[newTheme];
+        themeDropdown.classList.remove('show');
+        
+        if (window.aeroium && window.aeroium.applyTheme) {
+          window.aeroium.applyTheme(newTheme);
+        }
+      });
+    });
+
+    setTimeout(() => {
+      const splash = document.getElementById('splash');
+      const mainContent = document.getElementById('mainContent');
+      
+      splash.classList.add('hide');
+      setTimeout(() => { mainContent.classList.add('show'); }, 200);
+      
+      setTimeout(() => { splash.remove(); }, 1200);
+      setTimeout(() => { document.getElementById('searchInput').focus(); }, 1000);
+    }, 2400);
+
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        let query = e.target.value.trim();
+        if (query) {
+          const isUrl = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(\/.*)?$/i.test(query);
+          if (isUrl) {
+            if (!query.startsWith('http')) query = 'https://' + query;
+            window.location.href = query;
+          } else {
+            window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+          }
+        }
+      }
+    });
+
+    const shortcutsContainer = document.getElementById('shortcuts-container');
+    const modal = document.getElementById('addModal');
+
+    function loadShortcuts() {
+      const customShortcuts = JSON.parse(localStorage.getItem('aeroium-shortcuts') || '[]');
+      customShortcuts.forEach((sc, index) => {
+        const a = document.createElement('a');
+        a.href = /^https?:\/\//i.test(sc.url) ? sc.url : 'https://' + sc.url;
+        a.className = 'shortcut';
+        const icon = document.createElement('div');
+        icon.className = 'shortcut-icon';
+        icon.style.cssText = 'background: var(--accent); color: white;';
+        icon.textContent = String(sc.name).charAt(0).toUpperCase();
+        const label = document.createElement('span');
+        label.className = 'shortcut-text';
+        label.textContent = sc.name;
+        const del = document.createElement('button');
+        del.className = 'delete-btn';
+        del.textContent = '✕';
+        del.onclick = (e) => removeShortcut(e, index);
+        a.append(icon, label, del);
+        shortcutsContainer.appendChild(a);
+      });
+
+      const addBtn = document.createElement('div');
+      addBtn.className = 'shortcut sc-add';
+      addBtn.onclick = openModal;
+      addBtn.innerHTML = `<span class="shortcut-icon" style="background: transparent; font-size: 28px;">+</span>`;
+      shortcutsContainer.appendChild(addBtn);
+    }
+
+    function openModal() { modal.classList.add('active'); document.getElementById('newName').focus(); }
+    function closeModal() { modal.classList.remove('active'); document.getElementById('newName').value = ''; document.getElementById('newUrl').value = ''; }
+    
+    function saveShortcut() {
+      const name = document.getElementById('newName').value.trim();
+      let url = document.getElementById('newUrl').value.trim();
+      if (!name || !url) return;
+      const customShortcuts = JSON.parse(localStorage.getItem('aeroium-shortcuts') || '[]');
+      customShortcuts.push({ name, url });
+      localStorage.setItem('aeroium-shortcuts', JSON.stringify(customShortcuts));
+      closeModal();
+      location.reload();
+    }
+
+    function removeShortcut(e, index) {
+      e.preventDefault();
+      e.stopPropagation();
+      const customShortcuts = JSON.parse(localStorage.getItem('aeroium-shortcuts') || '[]');
+      customShortcuts.splice(index, 1);
+      localStorage.setItem('aeroium-shortcuts', JSON.stringify(customShortcuts));
+      location.reload();
+    }
+
+    loadShortcuts();
+  </script>
+</body>
+</html>
